@@ -1,0 +1,52 @@
+---
+- name: Deploy Docker Container
+  hosts: all
+  vars_prompt:
+    - name: image_name
+      prompt: "docker image (eg. traefik/traefik:latest)"
+      private: false
+
+    - name: deploy_dir
+      prompt: "deploy directory (leave blank for ~/{{ image_name | split('/') | last | split(':') | first }})"
+      private: false
+      default: ""
+
+    - name: ports
+      prompt: "ports to expose (eg. 8080:80,443:443 or leave blank. remember to add any ports you open to your allow list!)"
+      private: false
+      default: ""
+
+    - name: environment_vars
+      prompt: "environment variables (eg. KEY=value,KEY2=value2 or leave blank)"
+      private: false
+      default: ""
+
+    - name: devices
+      prompt: "devices to pass through (eg. /dev/video0:/dev/video0 or leave blank)"
+      private: false
+      default: ""
+
+    - name: restart_policy
+      prompt: "restart policy (no/always/unless-stopped/on-failure)"
+      private: false
+      default: "unless-stopped"
+
+  tasks:
+    - name: set deploy directory
+      set_fact:
+        final_dir: "{{ deploy_dir if deploy_dir != '' else ansible_env.HOME + '/' + (image_name | split('/') | last | split(':') | first) }}"
+
+    - name: Create deploy directory
+      file:
+        path: "{{ final_dir }}"
+        state: directory
+
+    - name: template docker-compose.yml
+      template:
+        src: templates/docker-compose.yml.j2
+        dest: "{{ final_dir }}/docker-compose.yml"
+
+    - name: start container
+      command: docker compose up -d
+      args:
+        chdir: "{{ final_dir }}"

@@ -1,0 +1,22 @@
+services:
+  {{ image_name | split('/') | last | split(':') | first }}:
+    image: {{ image_name }}
+    restart: {{ restart_policy }}
+{% if ports != '' %}
+    ports:
+{% for port in ports.split(',') %}
+      - "{{ port }}"
+{% endfor %}
+{% endif %}
+{% if environment_vars != '' %}
+    environment:
+{% for env in environment_vars.split(',') %}
+      - {{ env }}
+{% endfor %}
+{% endif %}
+{% if devices != '' %}
+    devices:
+{% for device in devices.split(',') %}
+      - {{ device }}
+{% endfor %}
+{% endif %}
