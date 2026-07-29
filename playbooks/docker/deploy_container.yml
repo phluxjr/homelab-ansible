@@ -7,7 +7,7 @@
       private: false
 
     - name: deploy_dir
-      prompt: "deploy directory (leave blank for ~/{{ image_name | split('/') | last | split(':') | first }})"
+      prompt: "deploy directory (leave blank to auto-generate from image name)"
       private: false
       default: ""
 
